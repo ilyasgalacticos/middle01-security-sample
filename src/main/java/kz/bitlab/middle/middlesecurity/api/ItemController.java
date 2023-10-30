@@ -1,5 +1,6 @@
 package kz.bitlab.middle.middlesecurity.api;
 
+import kz.bitlab.middle.middlesecurity.beans.SomeBean;
 import kz.bitlab.middle.middlesecurity.dto.ItemDto;
 import kz.bitlab.middle.middlesecurity.service.ItemService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+    private final SomeBean someBean;
 
     @GetMapping
     public List<ItemDto> getItems(){

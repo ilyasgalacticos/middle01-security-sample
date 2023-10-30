@@ -1,17 +1,25 @@
 package kz.bitlab.middle.middlesecurity.client;
 
 import kz.bitlab.middle.middlesecurity.dto.UserCreateDto;
+import kz.bitlab.middle.middlesecurity.dto.UserSignInDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -31,6 +39,8 @@ public class KeycloakClient {
 
     @Value("${keycloak.client-secret}")
     private String clientSecret;
+
+    private final RestTemplate restTemplate;
 
     public UserRepresentation createUser(UserCreateDto userCreateDto) {
 
@@ -68,4 +78,29 @@ public class KeycloakClient {
 
     }
 
+    public String signIn(UserSignInDto userSignInDto) {
+
+        String tokenEndpoint = url + "/realms/" + realm + "/protocol/openid-connect/token";
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "password");
+        formData.add("client_id", clientId);
+        formData.add("client_secret", clientSecret);
+        formData.add("username", userSignInDto.getUsername());
+        formData.add("password", userSignInDto.getPassword());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/x-www-form-urlencoded");
+
+        ResponseEntity<Map> response = restTemplate
+                .postForEntity(tokenEndpoint, new HttpEntity<>(formData, headers), Map.class);
+
+        Map<String, Object> responseBody = response.getBody();
+
+        if (!response.getStatusCode().is2xxSuccessful() || responseBody == null) {
+            log.error("Error on signing user, status: {}", response.getStatusCode());
+            throw new RuntimeException("Failed to sign in in user = " + userSignInDto.getUsername());
+        }
+        return (String) responseBody.get("access_token");
+    }
 }
