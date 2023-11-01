@@ -5,14 +5,12 @@ import kz.bitlab.middle.middlesecurity.dto.UserChangePasswordDto;
 import kz.bitlab.middle.middlesecurity.dto.UserCreateDto;
 import kz.bitlab.middle.middlesecurity.dto.UserSignInDto;
 import kz.bitlab.middle.middlesecurity.service.UserService;
+import kz.bitlab.middle.middlesecurity.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -41,5 +39,21 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error on changing password");
         }
+    }
+
+    @PostMapping(value = "/update-own-password/{ownPassword}")
+    public ResponseEntity<?> changeOwnPassword(@PathVariable(name = "ownPassword") String ownPassword){
+        try{
+
+            String currentUser = UserUtils.getCurrentUserName();
+            if (currentUser != null) {
+                userService.changePassword(currentUser, ownPassword);
+                return ResponseEntity.ok("Password changes successfully");
+            }
+
+        }catch (RuntimeException e){
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error on changing password");
     }
 }
