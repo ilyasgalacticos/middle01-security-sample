@@ -23,4 +23,8 @@ public class UserService {
     public String signIn(UserSignInDto userSignInDto){
         return keycloakClient.signIn(userSignInDto);
     }
+
+    public void changePassword(String username, String newPassword){
+        keycloakClient.changePassword(username, newPassword);
+    }
 }

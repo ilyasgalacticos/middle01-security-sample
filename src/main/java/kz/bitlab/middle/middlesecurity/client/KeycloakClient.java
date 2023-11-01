@@ -103,4 +103,28 @@ public class KeycloakClient {
         }
         return (String) responseBody.get("access_token");
     }
+
+    public void changePassword(String username, String newPassword){
+        List<UserRepresentation> users = keycloak
+                .realm(realm)
+                .users()
+                .search(username);
+        if(users.isEmpty()){
+            log.error("User not found with username: {}", username);
+            throw new RuntimeException("User not found with username : " + username);
+        }
+
+        UserRepresentation userRepresentation = users.get(0);
+        CredentialRepresentation credentialRepresentation = new CredentialRepresentation();
+        credentialRepresentation.setType(CredentialRepresentation.PASSWORD);
+        credentialRepresentation.setValue(newPassword);
+        credentialRepresentation.setTemporary(false);
+
+        keycloak
+                .realm(realm)
+                .users()
+                .get(userRepresentation.getId())
+                .resetPassword(credentialRepresentation);
+        log.info("Password changed successfully for username: {}", username);
+    }
 }
