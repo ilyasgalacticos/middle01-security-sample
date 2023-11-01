@@ -3,6 +3,7 @@ package kz.bitlab.middle.middlesecurity.api;
 import kz.bitlab.middle.middlesecurity.beans.SomeBean;
 import kz.bitlab.middle.middlesecurity.dto.ItemDto;
 import kz.bitlab.middle.middlesecurity.service.ItemService;
+import kz.bitlab.middle.middlesecurity.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ public class ItemController {
 
     @GetMapping(value = "/item-list")
     public String itemList(){
+        System.out.println(UserUtils.getCurrentUserName());
         return "This is itemList";
     }
 
